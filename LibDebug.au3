@@ -3,7 +3,7 @@
 ;                           because it's not just for debugging
 ;                          Remove last modified date
 ; 8/1/2021 12:27 AM GMT+8 - Add update history
-;                           Change `Consoleout` to always return string written
+;                           Change `Consoleout()` to always return string written
 
 #include-once
 #include <MsgBoxConstants.au3>
