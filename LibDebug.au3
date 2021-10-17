@@ -1,4 +1,5 @@
 ; Update history
+; 10/17/2021 5:27 PM GMT+8 - Fix functions inserting wrong variable
 ; 8/4/2021 6:13 AM GMT+8 - Rename `throw()` to `Throw()`
 ;                           because it's not just for debugging
 ;                          Remove last modified date
@@ -42,7 +43,7 @@ Func c($s = "", $nl = True, $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
                 Case 3
                     $s = StringReplace($s, "@PH2@", $v3, 1)
                 Case 4
-                    $s = StringReplace($s, "@PH2@", $v3, 1)
+                    $s = StringReplace($s, "@PH2@", $v4, 1)
                 Case 5
                     $s = StringReplace($s, "@PH2@", $v5, 1)
                 Case 6
@@ -87,7 +88,7 @@ Func iv($s = "", $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
                 Case 3
                     $s = StringReplace($s, "@PH2@", $v3, 1)
                 Case 4
-                    $s = StringReplace($s, "@PH2@", $v3, 1)
+                    $s = StringReplace($s, "@PH2@", $v4, 1)
                 Case 5
                     $s = StringReplace($s, "@PH2@", $v5, 1)
                 Case 6
