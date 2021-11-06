@@ -1,4 +1,5 @@
 ; Update history
+; 11/7/2021 3:38 AM GMT+8 - Add auto newline insertion ("\n") to string functions
 ; 10/17/2021 5:27 PM GMT+8 - Fix functions inserting wrong variable
 ; 8/4/2021 6:13 AM GMT+8 - Rename `throw()` to `Throw()`
 ;                           because it's not just for debugging
@@ -30,6 +31,7 @@ Func c($s = "", $nl = True, $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
     If Not $_LD_Debug Then
         Return
     EndIf
+    $s = StringReplace($s, "\n", @CRLF)
     If @NumParams > 2 Then
         $s = StringReplace($s, "$$", "@PH@")
         $s = StringReplace($s, "$", "@PH2@")
@@ -73,8 +75,9 @@ EndFunc
 ; Insert variable
 ; Returns a string with all given variables inserted into
 Func iv($s = "", $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
-                $v4 = 0x0, $v5 = 0x0, $v6 = 0x0, _
-                $v7 = 0x0, $v8 = 0x0, $v9 = 0x0, $v10 = 0x0)
+                 $v4 = 0x0, $v5 = 0x0, $v6 = 0x0, _
+                 $v7 = 0x0, $v8 = 0x0, $v9 = 0x0, $v10 = 0x0)
+    $s = StringReplace($s, "\n", @CRLF)
     If @NumParams > 1 Then
         $s = StringReplace($s, "$$", "@PH@")
         $s = StringReplace($s, "$", "@PH2@")
