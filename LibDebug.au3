@@ -1,8 +1,11 @@
 ; Update history
-; 11/7/2021 3:49 AM GMT+8 - Add comment about newline insertion
-; 11/7/2021 3:38 AM GMT+8 - Add auto newline insertion ("\n") to string functions
-; 10/17/2021 5:27 PM GMT+8 - Fix functions inserting wrong variable
-; 8/4/2021 6:13 AM GMT+8 - Rename `throw()` to `Throw()`
+; 1/12/2022 3:21 AM GMT+8 - Refactor a few lines of comment, and happy new year!
+;                           TODO: Remove the stupid $_LD_Debug things,
+;                            throw("obsolete") on invocation instead
+; 11/7/2021 3:49 AM GMT+8 - Add comment about newline interpolation
+; 11/7/2021 3:38 AM GMT+8 - Add newline interpolation ("\n") to string functions
+; 10/17/2021 5:27 PM GMT+8 - Fix functions interpolating wrong variable
+; 8/4/2021 6:13 AM GMT+8 - Rename `throw()` to `Throw()`,
 ;                           because it's not just for debugging
 ;                          Remove last modified date
 ; 8/1/2021 12:27 AM GMT+8 - Add update history
@@ -26,7 +29,7 @@ EndFunc
 ; Consoleout
 ; Automatically replaces $ to variables given
 ; Escape $ using $$
-; Use \n for auto newline
+; Use \n for newline char
 Func c($s = "", $nl = True, $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
                             $v4 = 0x0, $v5 = 0x0, $v6 = 0x0, _
                             $v7 = 0x0, $v8 = 0x0, $v9 = 0x0, $v10 = 0x0)
@@ -74,9 +77,9 @@ Func c($s = "", $nl = True, $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
     Return $s
 EndFunc
 
-; Insert variable
-; Returns a string with all given variables inserted into
-; Use \n for auto newline
+; Insert Variable
+; Returns a string with all the given variables inserted into
+; Use \n for newline char
 Func iv($s = "", $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
                  $v4 = 0x0, $v5 = 0x0, $v6 = 0x0, _
                  $v7 = 0x0, $v8 = 0x0, $v9 = 0x0, $v10 = 0x0)
@@ -124,7 +127,7 @@ Func cl()
 EndFunc
 
 ; Consoleout Variable
-; Only accepts the name of variable without the $ as string
+; Requires the name of variables without the $ as string
 ; Does not work when compiled using stripper param /rm "rename variables"
 Func cv($nl = True, $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, $v4 = 0x0, $v5 = 0x0, _
                         $v6 = 0x0, $v7 = 0x0, $v8 = 0x0, $v9 = 0x0, $v10 = 0x0)
