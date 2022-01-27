@@ -1,4 +1,5 @@
 ; Update history
+; 1/27/2022 1:36 PM GMT+8 - Remove `Eval()` usage in `Throw()` and `cv()`
 ; 1/12/2022 3:21 AM GMT+8 - Refactor a few lines of comment, and happy new year!
 ;                           TODO: Remove the stupid $_LD_Debug things,
 ;                            throw("obsolete") on invocation instead
@@ -136,7 +137,28 @@ Func cv($nl = True, $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, $v4 = 0x0, $v5 = 0x0, _
     EndIf
     Local $s = ""
     For $i = 1 To @NumParams - 1
-        $s &= "$" & Eval("v" & $i) & " = " & Eval(Eval("v" & $i))
+        Switch ($i)
+            Case 1
+                $s &= "$" & $v1 & " = " & Eval($v1)
+            Case 2
+                $s &= "$" & $v2 & " = " & Eval($v2)
+            Case 3
+                $s &= "$" & $v3 & " = " & Eval($v3)
+            Case 4
+                $s &= "$" & $v4 & " = " & Eval($v4)
+            Case 5
+                $s &= "$" & $v5 & " = " & Eval($v5)
+            Case 6
+                $s &= "$" & $v6 & " = " & Eval($v6)
+            Case 7
+                $s &= "$" & $v7 & " = " & Eval($v7)
+            Case 8
+                $s &= "$" & $v8 & " = " & Eval($v8)
+            Case 9
+                $s &= "$" & $v9 & " = " & Eval($v9)
+            Case 10
+                $s &= "$" & $v10 & " = " & Eval($v10)
+        EndSwitch
         If $i < @NumParams - 1 Then
             $s &= " | "
         EndIf
@@ -257,7 +279,28 @@ Func Throw($funcName, $m1 = 0x0, $m2 = 0x0, $m3 = 0x0, $m4 = 0x0, $m5 = 0x0, _
     Local $s = "Exception catched on """ & $funcName & "()"""
     For $i = 1 To @NumParams - 1
         $s &= @CRLF & @CRLF
-        $s &= Eval("m" & $i)
+        Switch ($i)
+            Case 1
+                $s &= $m1
+            Case 2
+                $s &= $m2
+            Case 3
+                $s &= $m3
+            Case 4
+                $s &= $m4
+            Case 5
+                $s &= $m5
+            Case 6
+                $s &= $m6
+            Case 7
+                $s &= $m7
+            Case 8
+                $s &= $m8
+            Case 9
+                $s &= $m9
+            Case 10
+                $s &= $m10
+        EndSwitch
     Next
     MsgBox($MB_ICONERROR + $MB_TOPMOST, StringTrimRight(@ScriptName, 4), $s)
 EndFunc
