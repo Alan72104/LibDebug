@@ -1,16 +1,17 @@
 ; Update history
-; 1/27/2022 1:36 PM GMT+8 - Remove `Eval()` usage in `Throw()` and `cv()`
-; 1/12/2022 3:21 AM GMT+8 - Refactor a few lines of comment, and happy new year!
-;                           TODO: Remove the stupid $_LD_Debug things,
-;                            throw("obsolete") on invocation instead
-; 11/7/2021 3:49 AM GMT+8 - Add comment about newline interpolation
-; 11/7/2021 3:38 AM GMT+8 - Add newline interpolation ("\n") to string functions
-; 10/17/2021 5:27 PM GMT+8 - Fix functions interpolating wrong variable
-; 8/4/2021 6:13 AM GMT+8 - Rename `throw()` to `Throw()`,
-;                           because it's not just for debugging
-;                          Remove last modified date
-; 8/1/2021 12:27 AM GMT+8 - Add update history
-;                           Change `Consoleout()` to always return string written
+; 3/2/2022 - Add ConsoleoutTimerDiff 'ct()'
+; 1/27/2022 - Remove `Eval()` usage in `Throw()` and `cv()`
+; 1/12/2022 - Refactor a few lines of comment, and happy new year!
+;             TODO: Remove the stupid $_LD_Debug things,
+;             throw("obsolete") on invocation instead
+; 11/7/2021 - Add comment about newline interpolation
+; 11/7/2021 - Add newline interpolation ("\n") to string functions
+; 10/17/2021 - Fix functions interpolating wrong variable
+; 8/4/2021 - Rename `throw()` to `Throw()`,
+;            because it's not just for debugging
+;            Remove last modified date
+; 8/1/2021  - Add update history
+;             change `Consoleout()` to always return string written
 
 #include-once
 #include <MsgBoxConstants.au3>
@@ -262,6 +263,11 @@ Func ca_internal(ByRef $s, ByRef $a, $dim, $dims, $ref, $nlOnNewEle, $indentForN
             $s &= @CRLF
         EndIf
     EndIf
+EndFunc
+
+; Consoleout Timerdiff
+Func ct($t)
+    c(TimerDiff($t))
 EndFunc
 
 ; Consoleout Error
