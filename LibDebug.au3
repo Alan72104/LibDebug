@@ -1,17 +1,18 @@
 ; Update history
-; 3/2/2022 - Add ConsoleoutTimerDiff 'ct()'
-; 1/27/2022 - Remove `Eval()` usage in `Throw()` and `cv()`
+; 1/20/2023 - Add ConsoleGet cget()
+; 3/2/2022 - Add ConsoleoutTimerDiff ct()
+; 1/27/2022 - Remove Eval() usage in Throw() and cv()
 ; 1/12/2022 - Refactor a few lines of comment, and happy new year!
 ;             TODO: Remove the stupid $_LD_Debug things,
 ;             throw("obsolete") on invocation instead
 ; 11/7/2021 - Add comment about newline interpolation
 ; 11/7/2021 - Add newline interpolation ("\n") to string functions
 ; 10/17/2021 - Fix functions interpolating wrong variable
-; 8/4/2021 - Rename `throw()` to `Throw()`,
+; 8/4/2021 - Rename throw() to Throw(),
 ;            because it's not just for debugging
 ;            Remove last modified date
-; 8/1/2021  - Add update history
-;             change `Consoleout()` to always return string written
+; 8/1/2021 - Add update history
+;            change Consoleout() to always return string written
 
 #include-once
 #include <MsgBoxConstants.au3>
@@ -118,6 +119,24 @@ Func iv($s = "", $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
         $s = StringReplace($s, "@PH@", "$")
     EndIf
     Return $s
+EndFunc
+
+; Designed for NppExec Console
+; Gets string before a newline from the console with a timeout
+; Anything read after the newline in this function is discarded
+Func cget($timeout = 2147483647)
+    Local $s = ""
+    Local $timer = TimerInit()
+    While TimerDiff($timer) < $timeout
+        $s = ConsoleRead()
+        Local $pos = StringInStr($s, @LF, $STR_NOCASESENSEBASIC)
+        If $pos <> 0 Then
+            ConsoleRead()
+            Return StringStripWS(StringLeft($s, $pos), $STR_STRIPTRAILING)
+        EndIf
+        Sleep(50)
+    WEnd
+    Return ""
 EndFunc
 
 ; Consoleout Line
