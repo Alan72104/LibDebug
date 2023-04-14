@@ -1,4 +1,5 @@
 ; Update history
+; 4/14/2023 - Add CheckedHotKeySet()
 ; 1/20/2023 - Add ConsoleGet cget()
 ; 3/2/2022 - Add ConsoleoutTimerDiff ct()
 ; 1/27/2022 - Remove Eval() usage in Throw() and cv()
@@ -17,6 +18,7 @@
 #include-once
 #include <MsgBoxConstants.au3>
 #include <StringConstants.au3>
+#include <WinAPIError.au3>
 
 Global $_LD_Debug = True
 Global $_Profile_Map[0][3]
@@ -298,10 +300,48 @@ Func ce($e, $nl = True)
     EndIf
 EndFunc
 
+; Throws and exits if HotKeySet was failed (not every invalid hotkey is checked)
+Func CheckedHotKeySet($key, $function = 0x0)
+    If @NumParams = 1 Then
+        If Not HotKeySet($key) Then
+            Local $winError = _WinAPI_GetLastError()
+            Throw("CheckedHotKeySet", _
+                ($winError = 0) ? "Invalid or not registered hotkey " : _WinAPI_GetLastErrorMessage(), _
+                'Hotkey: "' & $key & '"')
+            Exit
+        EndIf
+        Return 1
+    Else
+        If Not HotKeySet($key, $function) Then
+            Local $winError = _WinAPI_GetLastError()
+            Local $functionType = IsFunc($function) ; Function reference
+            If Not $functionType Then
+                $functionType = IsFunc(Execute($function)) ; Function name or other
+            EndIf
+            Local $errorString = ""
+            If $winError <> 0 Then
+                $errorString = _WinAPI_GetLastErrorMessage()
+            ElseIf $functionType = 2 Then
+                $errorString = "Builtin function is not allowed"
+            ElseIf $functionType = 0 Then
+                $errorString = "Invalid function"
+            Else
+                $errorString = "Invalid hotkey"
+            EndIf
+            Throw("CheckedHotKeySet", _
+                $errorString, _
+                'Hotkey: "' & $key & '"', _
+                'Function: "' & (IsFunc($function) ? FuncName($function) : $function) & '"')
+            Exit
+        EndIf
+        Return 1
+    EndIf
+EndFunc
+
 ; Throws an error msgbox
 Func Throw($funcName, $m1 = 0x0, $m2 = 0x0, $m3 = 0x0, $m4 = 0x0, $m5 = 0x0, _
                                  $m6 = 0x0, $m7 = 0x0, $m8 = 0x0, $m9 = 0x0, $m10 = 0x0)
-    Local $s = "Exception catched on """ & $funcName & "()"""
+    Local $s = "Exception on " & $funcName & "()"
     For $i = 1 To @NumParams - 1
         $s &= @CRLF & @CRLF
         Switch ($i)
