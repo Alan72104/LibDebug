@@ -1,4 +1,5 @@
 ; Update history
+; 4/19/2023 - Make c() return the original type instead of string
 ; 4/14/2023 - Add CheckedHotKeySet()
 ; 1/20/2023 - Add ConsoleGet cget()
 ; 3/2/2022 - Add ConsoleoutTimerDiff ct()
@@ -34,45 +35,48 @@ EndFunc
 ; Consoleout
 ; Automatically replaces $ to variables given
 ; Escape $ using $$
-; Use \n for newline char
+; Use \n for \r\n
 Func c($s = "", $nl = True, $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
                             $v4 = 0x0, $v5 = 0x0, $v6 = 0x0, _
                             $v7 = 0x0, $v8 = 0x0, $v9 = 0x0, $v10 = 0x0)
     If Not $_LD_Debug Then
         Return
     EndIf
-    $s = StringReplace($s, "\n", @CRLF)
-    If @NumParams > 2 Then
-        $s = StringReplace($s, "$$", "@PH@")
-        $s = StringReplace($s, "$", "@PH2@")
-        For $i = 1 To @NumParams - 2
-            ; Don't use Eval() to prevent breaking when compiled using stripper param /rm "rename variables"
-            Switch ($i)
-                Case 1
-                    $s = StringReplace($s, "@PH2@", $v1, 1)
-                Case 2
-                    $s = StringReplace($s, "@PH2@", $v2, 1)
-                Case 3
-                    $s = StringReplace($s, "@PH2@", $v3, 1)
-                Case 4
-                    $s = StringReplace($s, "@PH2@", $v4, 1)
-                Case 5
-                    $s = StringReplace($s, "@PH2@", $v5, 1)
-                Case 6
-                    $s = StringReplace($s, "@PH2@", $v6, 1)
-                Case 7
-                    $s = StringReplace($s, "@PH2@", $v7, 1)
-                Case 8
-                    $s = StringReplace($s, "@PH2@", $v8, 1)
-                Case 9
-                    $s = StringReplace($s, "@PH2@", $v9, 1)
-                Case 10
-                    $s = StringReplace($s, "@PH2@", $v10, 1)
-            EndSwitch
-            If @extended = 0 Then ExitLoop
-        Next
-        $s = StringReplace($s, "@PH@", "$")
-        $s = StringReplace($s, "@PH2@", "$")
+    ; Preserve the original type
+    If IsString($s) Then
+        $s = StringReplace($s, "\n", @CRLF)
+        If @NumParams > 2 Then
+            $s = StringReplace($s, "$$", "@PH@")
+            $s = StringReplace($s, "$", "@PH2@")
+            For $i = 1 To @NumParams - 2
+                ; Don't use Eval() to prevent breaking when compiled using stripper param /rm "rename variables"
+                Switch ($i)
+                    Case 1
+                        $s = StringReplace($s, "@PH2@", $v1, 1)
+                    Case 2
+                        $s = StringReplace($s, "@PH2@", $v2, 1)
+                    Case 3
+                        $s = StringReplace($s, "@PH2@", $v3, 1)
+                    Case 4
+                        $s = StringReplace($s, "@PH2@", $v4, 1)
+                    Case 5
+                        $s = StringReplace($s, "@PH2@", $v5, 1)
+                    Case 6
+                        $s = StringReplace($s, "@PH2@", $v6, 1)
+                    Case 7
+                        $s = StringReplace($s, "@PH2@", $v7, 1)
+                    Case 8
+                        $s = StringReplace($s, "@PH2@", $v8, 1)
+                    Case 9
+                        $s = StringReplace($s, "@PH2@", $v9, 1)
+                    Case 10
+                        $s = StringReplace($s, "@PH2@", $v10, 1)
+                EndSwitch
+                If @extended = 0 Then ExitLoop
+            Next
+            $s = StringReplace($s, "@PH@", "$")
+            $s = StringReplace($s, "@PH2@", "$")
+        EndIf
     EndIf
     If $nl Then
         ConsoleWrite($s & @CRLF)
@@ -192,6 +196,7 @@ Func cv($nl = True, $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, $v4 = 0x0, $v5 = 0x0, _
 EndFunc
 
 ; Consoleout Array
+; Set $out = False to get the string without printing, else returns the original array
 Func ca(ByRef $a, $nl = True, $nlOnNewEle = False, $indentForNewEle = " ", $out = True)
     If Not IsArray($a) Then
         Return
