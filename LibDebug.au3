@@ -1,4 +1,5 @@
 ; Update history
+; 3/13/2024 - Add `Const` to ca() array parameter
 ; 8/30/2023 - Add Consoleout Mock cmock(),
 ;             useful for function local debugging,
 ;             `Local $c = $debugging ? c : cmock`
@@ -207,7 +208,7 @@ EndFunc
 
 ; Consoleout Array
 ; Set $out = False to get the string without printing, else returns the original array
-Func ca(ByRef $a, $nl = True, $nlOnNewEle = False, $indentForNewEle = " ", $out = True)
+Func ca(Const ByRef $a, $nl = True, $nlOnNewEle = False, $indentForNewEle = " ", $out = True)
     If Not IsArray($a) Then
         Return
     EndIf
