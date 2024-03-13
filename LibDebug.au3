@@ -1,6 +1,7 @@
 ; Update history
 ; 3/13/2024 - Add `Const` to ca() array parameter
 ;             Add ArrayAdd(), ArrayFind(), Min() and Max()
+;             Add function list
 ; 8/30/2023 - Add Consoleout Mock cmock(),
 ;             useful for function local debugging,
 ;             `Local $c = $debugging ? c : cmock`
@@ -21,6 +22,31 @@
 ; 8/1/2021 - Add update history
 ;            change Consoleout() to always return string written
 
+; Functions:
+; _DebugOff()
+; _DebugOn()
+; CheckedHotKeySet($key, $function = 0x0)
+; ArrayAdd(ByRef $a, $v)
+; ArrayFind(ByRef $a, $v)
+; Min($a, $b)
+; Max($a, $b)
+; Throw($funcName, $msg1 ... $msg10)
+;
+; Consoleout             c($v = "", $nl = True, $v1 ... $v10)
+; Consoleout Mock        cmock($v = "", $nl = True, $v1 ... $v10)
+; Insert Variable        iv($s = "", $v1 ... $v10)
+; Console Get            cget($timeoutMs = 2147483647)
+; Consoleout Line        cl()
+; Consoleout Variable    cv($nl = True, $v1 ... $v10)
+; Consoleout Array       ca(Const ByRef $a, $nl = True, $nlOnNewEle = False, $indentForNewEle = " ", $out = True)
+; Consoleout Timerdiff   ct($t)
+; Consoleout Error       ce($e, $nl = True)
+; Profiler profile Add   pa($key)
+; Profiler profile Start ps($key)
+; Profiler profile End   pe($key)
+; Profiler Print result  pp()
+; Profiler Reset         pr()
+
 #include-once
 #include <MsgBoxConstants.au3>
 #include <StringConstants.au3>
@@ -35,6 +61,98 @@ EndFunc
 
 Func _DebugOn()
     $_LD_Debug = True
+EndFunc
+
+; Throws and exits if HotKeySet was failed (not every invalid hotkey is checked)
+Func CheckedHotKeySet($key, $function = 0x0)
+    If @NumParams = 1 Then
+        If Not HotKeySet($key) Then
+            Local $winError = _WinAPI_GetLastError()
+            Throw("CheckedHotKeySet", _
+                ($winError = 0) ? "Invalid or not registered hotkey " : _WinAPI_GetLastErrorMessage(), _
+                'Hotkey: "' & $key & '"')
+            Exit
+        EndIf
+        Return 1
+    Else
+        If Not HotKeySet($key, $function) Then
+            Local $winError = _WinAPI_GetLastError()
+            Local $functionType = IsFunc($function) ; Function reference
+            If Not $functionType Then
+                $functionType = IsFunc(Execute($function)) ; Function name or other
+            EndIf
+            Local $errorString = ""
+            If $winError <> 0 Then
+                $errorString = _WinAPI_GetLastErrorMessage()
+            ElseIf $functionType = 2 Then
+                $errorString = "Builtin function is not allowed"
+            ElseIf $functionType = 0 Then
+                $errorString = "Invalid function"
+            Else
+                $errorString = "Invalid hotkey"
+            EndIf
+            Throw("CheckedHotKeySet", _
+                $errorString, _
+                'Hotkey: "' & $key & '"', _
+                'Function: "' & (IsFunc($function) ? FuncName($function) : $function) & '"')
+            Exit
+        EndIf
+        Return 1
+    EndIf
+EndFunc
+
+Func ArrayAdd(ByRef $a, $v)
+	ReDim $a[UBound($a) + 1]
+	$a[UBound($a) - 1] = $v
+EndFunc
+
+Func ArrayFind(ByRef $a, $v)
+	For $i = 0 To UBound($a) - 1
+		If $a[$i] = $v Then
+			Return $i
+		EndIf
+	Next
+	Return -1
+EndFunc
+
+Func Min($a, $b)
+	Return $a < $b ? $a : $b
+EndFunc
+
+Func Max($a, $b)
+	Return $a > $b ? $a : $b
+EndFunc
+
+; Throws an error msgbox, does not exit the script
+Func Throw($funcName, $msg1 = 0x0, $msg2 = 0x0, $msg3 = 0x0, $msg4 = 0x0, $msg5 = 0x0, _
+                      $msg6 = 0x0, $msg7 = 0x0, $msg8 = 0x0, $msg9 = 0x0, $msg10 = 0x0)
+    Local $s = "Exception on " & $funcName & "()"
+    For $i = 1 To @NumParams - 1
+        $s &= @CRLF & @CRLF
+        Switch ($i)
+            Case 1
+                $s &= $msg1
+            Case 2
+                $s &= $msg2
+            Case 3
+                $s &= $msg3
+            Case 4
+                $s &= $msg4
+            Case 5
+                $s &= $msg5
+            Case 6
+                $s &= $msg6
+            Case 7
+                $s &= $msg7
+            Case 8
+                $s &= $msg8
+            Case 9
+                $s &= $msg9
+            Case 10
+                $s &= $msg10
+        EndSwitch
+    Next
+    MsgBox($MB_ICONERROR + $MB_TOPMOST, StringTrimRight(@ScriptName, 4), $s)
 EndFunc
 
 ; Consoleout
@@ -139,13 +257,14 @@ Func iv($s = "", $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, _
     Return $s
 EndFunc
 
+; Console Get
 ; Designed for NppExec Console
-; Gets string before a newline from the console with a timeout
+; Gets the string before a newline from the console with a timeout
 ; Anything read after the newline in this function is discarded
-Func cget($timeout = 2147483647)
+Func cget($timeoutMs = 2147483647)
     Local $s = ""
     Local $timer = TimerInit()
-    While TimerDiff($timer) < $timeout
+    While TimerDiff($timer) < $timeoutMs
         $s = ConsoleRead()
         Local $pos = StringInStr($s, @LF, $STR_NOCASESENSEBASIC)
         If $pos <> 0 Then
@@ -229,7 +348,7 @@ Func ca(Const ByRef $a, $nl = True, $nlOnNewEle = False, $indentForNewEle = " ",
     EndIf
 EndFunc
 
-Func ca_internal(ByRef $s, ByRef $a, $dim, $dims, $ref, $nlOnNewEle, $indentForNewEle)
+Func ca_internal(ByRef $s, Const ByRef $a, $dim, $dims, $ref, $nlOnNewEle, $indentForNewEle)
     Local $count = UBound($a, $dim)
     If $dim = $dims Then
         Local $ele
@@ -317,143 +436,51 @@ Func ce($e, $nl = True)
     EndIf
 EndFunc
 
-; Throws and exits if HotKeySet was failed (not every invalid hotkey is checked)
-Func CheckedHotKeySet($key, $function = 0x0)
-    If @NumParams = 1 Then
-        If Not HotKeySet($key) Then
-            Local $winError = _WinAPI_GetLastError()
-            Throw("CheckedHotKeySet", _
-                ($winError = 0) ? "Invalid or not registered hotkey " : _WinAPI_GetLastErrorMessage(), _
-                'Hotkey: "' & $key & '"')
-            Exit
-        EndIf
-        Return 1
-    Else
-        If Not HotKeySet($key, $function) Then
-            Local $winError = _WinAPI_GetLastError()
-            Local $functionType = IsFunc($function) ; Function reference
-            If Not $functionType Then
-                $functionType = IsFunc(Execute($function)) ; Function name or other
-            EndIf
-            Local $errorString = ""
-            If $winError <> 0 Then
-                $errorString = _WinAPI_GetLastErrorMessage()
-            ElseIf $functionType = 2 Then
-                $errorString = "Builtin function is not allowed"
-            ElseIf $functionType = 0 Then
-                $errorString = "Invalid function"
-            Else
-                $errorString = "Invalid hotkey"
-            EndIf
-            Throw("CheckedHotKeySet", _
-                $errorString, _
-                'Hotkey: "' & $key & '"', _
-                'Function: "' & (IsFunc($function) ? FuncName($function) : $function) & '"')
-            Exit
-        EndIf
-        Return 1
-    EndIf
-EndFunc
-
-Func ArrayAdd(ByRef $a, $v)
-	ReDim $a[UBound($a) + 1]
-	$a[UBound($a) - 1] = $v
-EndFunc
-
-Func ArrayFind(ByRef $a, $v)
-	For $i = 0 To UBound($a) - 1
-		If $a[$i] = $v Then
-			Return $i
-		EndIf
-	Next
-	Return -1
-EndFunc
-
-Func Min($a, $b)
-	Return $a < $b ? $a : $b
-EndFunc
-
-Func Max($a, $b)
-	Return $a > $b ? $a : $b
-EndFunc
-
-; Throws an error msgbox, does not exit the script
-Func Throw($funcName, $m1 = 0x0, $m2 = 0x0, $m3 = 0x0, $m4 = 0x0, $m5 = 0x0, _
-                                 $m6 = 0x0, $m7 = 0x0, $m8 = 0x0, $m9 = 0x0, $m10 = 0x0)
-    Local $s = "Exception on " & $funcName & "()"
-    For $i = 1 To @NumParams - 1
-        $s &= @CRLF & @CRLF
-        Switch ($i)
-            Case 1
-                $s &= $m1
-            Case 2
-                $s &= $m2
-            Case 3
-                $s &= $m3
-            Case 4
-                $s &= $m4
-            Case 5
-                $s &= $m5
-            Case 6
-                $s &= $m6
-            Case 7
-                $s &= $m7
-            Case 8
-                $s &= $m8
-            Case 9
-                $s &= $m9
-            Case 10
-                $s &= $m10
-        EndSwitch
-    Next
-    MsgBox($MB_ICONERROR + $MB_TOPMOST, StringTrimRight(@ScriptName, 4), $s)
-EndFunc
-
 ; Profiler profile Add
-Func pa($v)
+Func pa($key)
     For $i = 0 to UBound($_Profile_Map, 1) - 1
-        If $_Profile_Map[$i][0] = $v Then
-            c("Profiler >> The profile name already exists: ""$""", 1, $v)
+        If $_Profile_Map[$i][0] = $key Then
+            c("Profiler >> The profile name already exists: ""$""", 1, $key)
             Return
         EndIf
     Next
     ReDim $_Profile_Map[UBound($_Profile_Map, 1) + 1][3]
-    $_Profile_Map[UBound($_Profile_Map, 1) - 1][0] = $v  ; Name
+    $_Profile_Map[UBound($_Profile_Map, 1) - 1][0] = $key  ; Name
     $_Profile_Map[UBound($_Profile_Map, 1) - 1][1] = 0.0  ; Value
     $_Profile_Map[UBound($_Profile_Map, 1) - 1][2] = -1  ; Start time, -1 is not running
 EndFunc
 
 ; Profiler profile Start
-Func ps($v)
+Func ps($key)
     For $i = 0 to UBound($_Profile_Map, 1) - 1
-        If $_Profile_Map[$i][0] = $v Then
+        If $_Profile_Map[$i][0] = $key Then
             If $_Profile_Map[$i][2] = -1 Then
                 $_Profile_Map[$i][2] = TimerInit()
             Else
-                c("Profiler >> The specified profile to start is already started: ""$""", 1, $v)
+                c("Profiler >> The specified profile to start is already started: ""$""", 1, $key)
             EndIf
             Return
         EndIf
     Next
-    c("Profiler >> The specified profile to start does not exist: ""$"", adding profile...", 1, $v)
-    pa($v)
-    ps($v)
+    c("Profiler >> The specified profile to start does not exist: ""$"", adding profile...", 1, $key)
+    pa($key)
+    ps($key)
 EndFunc
 
 ; Profiler profile End
-Func pe($v)
+Func pe($key)
     For $i = 0 to UBound($_Profile_Map, 1) - 1
-        If $_Profile_Map[$i][0] = $v Then
+        If $_Profile_Map[$i][0] = $key Then
             If $_Profile_Map[$i][2] <> -1 Then
                 $_Profile_Map[$i][1] += TimerDiff($_Profile_Map[$i][2])
                 $_Profile_Map[$i][2] = -1
             Else
-                c("Profiler >> The specified profile to end has not start: ""$""", 1, $v)
+                c("Profiler >> The specified profile to end has not start: ""$""", 1, $key)
             EndIf
             Return
         EndIf
     Next
-    c("Profiler >> The specified profile to end does not exist: ""$""", 1, $v)
+    c("Profiler >> The specified profile to end does not exist: ""$""", 1, $key)
 EndFunc
 
 ; Profiler Print result
