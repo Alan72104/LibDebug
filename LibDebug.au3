@@ -1,5 +1,6 @@
 ; Update history
 ; 3/13/2024 - Add `Const` to ca() array parameter
+;             Add ArrayAdd(), ArrayFind(), Min() and Max()
 ; 8/30/2023 - Add Consoleout Mock cmock(),
 ;             useful for function local debugging,
 ;             `Local $c = $debugging ? c : cmock`
@@ -354,7 +355,29 @@ Func CheckedHotKeySet($key, $function = 0x0)
     EndIf
 EndFunc
 
-; Throws an error msgbox
+Func ArrayAdd(ByRef $a, $v)
+	ReDim $a[UBound($a) + 1]
+	$a[UBound($a) - 1] = $v
+EndFunc
+
+Func ArrayFind(ByRef $a, $v)
+	For $i = 0 To UBound($a) - 1
+		If $a[$i] = $v Then
+			Return $i
+		EndIf
+	Next
+	Return -1
+EndFunc
+
+Func Min($a, $b)
+	Return $a < $b ? $a : $b
+EndFunc
+
+Func Max($a, $b)
+	Return $a > $b ? $a : $b
+EndFunc
+
+; Throws an error msgbox, does not exit the script
 Func Throw($funcName, $m1 = 0x0, $m2 = 0x0, $m3 = 0x0, $m4 = 0x0, $m5 = 0x0, _
                                  $m6 = 0x0, $m7 = 0x0, $m8 = 0x0, $m9 = 0x0, $m10 = 0x0)
     Local $s = "Exception on " & $funcName & "()"
