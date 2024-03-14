@@ -1,4 +1,6 @@
 ; Update history
+; 3/14/2024 - Add `Default` support for ca(), and castr() as a macro
+;             for getting the array string
 ; 3/13/2024 - Add `Const` to ca() array parameter
 ;             Add ArrayAdd(), ArrayFind(), Min() and Max()
 ;             Add function list
@@ -326,12 +328,21 @@ Func cv($nl = True, $v1 = 0x0, $v2 = 0x0, $v3 = 0x0, $v4 = 0x0, $v5 = 0x0, _
     ConsoleWrite($s)
 EndFunc
 
+; Consoleout Array String
+Func castr(Const ByRef $a)
+    Return ca($a, False, Default, Default, False)
+EndFunc
+
 ; Consoleout Array
 ; Set $out = False to get the string without printing, else returns the original array
 Func ca(Const ByRef $a, $nl = True, $nlOnNewEle = False, $indentForNewEle = " ", $out = True)
     If Not IsArray($a) Then
         Return
     EndIf
+    If $nl = Default Then $nl = True
+    If $nlOnNewEle = Default Then $nlOnNewEle = False
+    If $indentForNewEle = Default Then $indentForNewEle = " "
+    If $out = Default Then $out = True
     Local $dims = UBound($a, 0)
     Local $s = ""
     $s &= "{"
