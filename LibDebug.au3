@@ -1,4 +1,5 @@
 ; Update history
+; 3/19/2024 - Make CheckedHotKeySet() exit optionally
 ; 3/14/2024 - Add `Default` support for ca(), and castr() as a macro
 ;             for getting the array string
 ; 3/13/2024 - Add `Const` to ca() array parameter
@@ -27,7 +28,7 @@
 ; Functions:
 ; _DebugOff()
 ; _DebugOn()
-; CheckedHotKeySet($key, $function = 0x0)
+; CheckedHotKeySet($key, $function = Default, $exit = True)
 ; ArrayAdd(ByRef $a, $v)
 ; ArrayFind(ByRef $a, $v)
 ; Min($a, $b)
@@ -65,30 +66,31 @@ Func _DebugOn()
     $_LD_Debug = True
 EndFunc
 
-; Throws and exits if HotKeySet was failed (not every invalid hotkey is checked)
-Func CheckedHotKeySet($key, $function = 0x0)
-    If @NumParams = 1 Then
+; Throws and exits (optionally) if HotKeySet() was failed (not every invalid hotkey is checked)
+; Returns 1 if successful, or 0 if failed and $exit is set to False
+Func CheckedHotKeySet($key, $func = Default, $exit = True)
+    If $func = Default Then
         If Not HotKeySet($key) Then
             Local $winError = _WinAPI_GetLastError()
             Throw("CheckedHotKeySet", _
                 ($winError = 0) ? "Invalid or not registered hotkey " : _WinAPI_GetLastErrorMessage(), _
                 'Hotkey: "' & $key & '"')
-            Exit
-        EndIf
-        Return 1
-    Else
-        If Not HotKeySet($key, $function) Then
-            Local $winError = _WinAPI_GetLastError()
-            Local $functionType = IsFunc($function) ; Function reference
-            If Not $functionType Then
-                $functionType = IsFunc(Execute($function)) ; Function name or other
+            If $exit Then
+                Exit
             EndIf
+            Return 0
+        EndIf
+    Else
+        If Not HotKeySet($key, $func) Then
+            Local $winError = _WinAPI_GetLastError()
+            Local $varType = IsFunc($func) ; Function reference
+            Local $funcType = (Not $varType) ? IsFunc(Execute($func)) : $varType ; Function name or other types
             Local $errorString = ""
             If $winError <> 0 Then
                 $errorString = _WinAPI_GetLastErrorMessage()
-            ElseIf $functionType = 2 Then
+            ElseIf $funcType = 2 Then
                 $errorString = "Builtin function is not allowed"
-            ElseIf $functionType = 0 Then
+            ElseIf $funcType = 0 Then
                 $errorString = "Invalid function"
             Else
                 $errorString = "Invalid hotkey"
@@ -96,11 +98,14 @@ Func CheckedHotKeySet($key, $function = 0x0)
             Throw("CheckedHotKeySet", _
                 $errorString, _
                 'Hotkey: "' & $key & '"', _
-                'Function: "' & (IsFunc($function) ? FuncName($function) : $function) & '"')
-            Exit
+                'Function: "' & ($varType ? FuncName($func) : $func) & '"')
+            If $exit Then
+                Exit
+            EndIf
+            Return 0
         EndIf
-        Return 1
     EndIf
+    Return 1
 EndFunc
 
 Func ArrayAdd(ByRef $a, $v)
