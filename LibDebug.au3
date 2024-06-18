@@ -1,4 +1,5 @@
 ; Update history
+; 6/19/2024 - Correct cget() to peek during the `ConsoleRead()` loop
 ; 3/19/2024 - Make CheckedHotKeySet() exit optionally
 ; 3/14/2024 - Add `Default` support for ca(), and castr() as a macro
 ;             for getting the array string
@@ -272,7 +273,10 @@ Func cget($timeoutMs = 2147483647)
     Local $s = ""
     Local $timer = TimerInit()
     While TimerDiff($timer) < $timeoutMs
-        $s = ConsoleRead()
+        $s = ConsoleRead(True)
+        If @error Then
+            Return ""
+        EndIf
         Local $pos = StringInStr($s, @LF, $STR_NOCASESENSEBASIC)
         If $pos <> 0 Then
             ConsoleRead()
