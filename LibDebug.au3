@@ -1,4 +1,5 @@
 ; Update history
+; 9/12/2024 - Add ArrayContains(), StringStartsWith() and StringEndsWith()
 ; 6/19/2024 - Correct cget() to peek during the `ConsoleRead()` loop
 ; 3/19/2024 - Make CheckedHotKeySet() exit optionally
 ; 3/14/2024 - Add `Default` support for ca(), and castr() as a macro
@@ -32,6 +33,9 @@
 ; CheckedHotKeySet($key, $function = Default, $exit = True)
 ; ArrayAdd(ByRef $a, $v)
 ; ArrayFind(ByRef $a, $v)
+; ArrayContains(ByRef $a, $v)
+; StringStartsWith($s, $v, $case = True)
+; StringEndsWith($s, $v, $case = True)
 ; Min($a, $b)
 ; Max($a, $b)
 ; Throw($funcName, $msg1 ... $msg10)
@@ -110,25 +114,45 @@ Func CheckedHotKeySet($key, $func = Default, $exit = True)
 EndFunc
 
 Func ArrayAdd(ByRef $a, $v)
-	ReDim $a[UBound($a) + 1]
-	$a[UBound($a) - 1] = $v
+    ReDim $a[UBound($a) + 1]
+    $a[UBound($a) - 1] = $v
 EndFunc
 
 Func ArrayFind(ByRef $a, $v)
-	For $i = 0 To UBound($a) - 1
-		If $a[$i] = $v Then
-			Return $i
-		EndIf
-	Next
-	Return -1
+    For $i = 0 To UBound($a) - 1
+        If $a[$i] = $v Then
+            Return $i
+        EndIf
+    Next
+    Return -1
+EndFunc
+
+Func ArrayContains(ByRef $a, $v)
+    Return ArrayFind($a, $v) <> -1
+EndFunc
+
+Func StringStartsWith($s, $v, $case = True)
+    If $case Then
+        Return StringLeft($s, StringLen($v)) == $v
+    Else
+        Return StringLeft($s, StringLen($v)) = $v
+    EndIf
+EndFunc
+
+Func StringEndsWith($s, $v, $case = True)
+    If $case Then
+        Return StringRight($s, StringLen($v)) == $v
+    Else
+        Return StringRight($s, StringLen($v)) = $v
+    EndIf
 EndFunc
 
 Func Min($a, $b)
-	Return $a < $b ? $a : $b
+    Return $a < $b ? $a : $b
 EndFunc
 
 Func Max($a, $b)
-	Return $a > $b ? $a : $b
+    Return $a > $b ? $a : $b
 EndFunc
 
 ; Throws an error msgbox, does not exit the script
