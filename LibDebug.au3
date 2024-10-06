@@ -1,4 +1,5 @@
 ; Update history
+; 10/6/2024 - Add StringJoin()
 ; 9/12/2024 - Add ArrayContains(), StringStartsWith() and StringEndsWith()
 ; 6/19/2024 - Correct cget() to peek during the `ConsoleRead()` loop
 ; 3/19/2024 - Make CheckedHotKeySet() exit optionally
@@ -36,6 +37,7 @@
 ; ArrayContains(ByRef $a, $v)
 ; StringStartsWith($s, $v, $case = True)
 ; StringEndsWith($s, $v, $case = True)
+; StringJoin(ByRef $a)
 ; Min($a, $b)
 ; Max($a, $b)
 ; Throw($funcName, $msg1 ... $msg10)
@@ -145,6 +147,18 @@ Func StringEndsWith($s, $v, $case = True)
     Else
         Return StringRight($s, StringLen($v)) = $v
     EndIf
+EndFunc
+
+Func StringJoin(ByRef $a)
+    Local $s = ""
+    Local $len = UBound($a)
+    For $i = 0 To $len - 1
+        $s &= $a[$i]
+        If $i < $len - 1 Then
+            $s &= ","
+        EndIf
+    Next
+    Return $s
 EndFunc
 
 Func Min($a, $b)
